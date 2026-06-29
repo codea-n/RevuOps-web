@@ -4,6 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { registerInstallation, getUserRepos } from '@/lib/actions'
+import type { Repo, Review } from './types.ts'
+
 
 export default async function DashboardPage({
   searchParams,
@@ -97,7 +99,7 @@ export default async function DashboardPage({
             <CardTitle className='text-base'>Connected Repositories</CardTitle>
           </CardHeader>
           <CardContent className='flex flex-col gap-3'>
-            {repos && repos.length > 0 ? repos.map((repo: any) => (
+            {repos && repos.length > 0 ? repos.map((repo: Repo) => (
               <div key={repo.id}
                 className='flex items-center justify-between py-3 border-b border-white/5 last:border-0'>
                 <span className='text-sm font-medium'>{repo.repo_full_name}</span>
@@ -122,7 +124,7 @@ export default async function DashboardPage({
             <CardTitle className='text-base'>Recent Reviews</CardTitle>
           </CardHeader>
           <CardContent className='flex flex-col gap-3'>
-            {reviews && reviews.length > 0 ? reviews.map((review: any) => (
+            {reviews && reviews.length > 0 ? reviews.map((review: Review) => (
               <div key={review.id}
                 className='flex items-center justify-between py-3 border-b border-white/5 last:border-0'>
                 <div className='flex flex-col gap-1'>
