@@ -3,9 +3,10 @@ import { redirect } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { registerInstallation, getUserRepos, signOut } from '@/lib/actions'
+import { registerInstallation, signOut } from '@/lib/actions'
 import Link from 'next/link'
-import type { Repo, Review } from '@/app/dashboard/types'
+import type { Review } from '@/app/dashboard/types'
+import RepoList from './components/RepoList'
 
 export default async function DashboardPage({
   searchParams,
@@ -32,14 +33,11 @@ export default async function DashboardPage({
     redirect('/dashboard')
   }
 
-  const [{ data: reviews }, { repos }] = await Promise.all([
-    supabase
+  const { data: reviews }= await supabase
       .from('reviews')
       .select('*')
       .order('created_at', { ascending: false })
-      .limit(20),
-    getUserRepos(user.id),
-  ])
+      .limit(20)
 
   const stats = {
     total: reviews?.length ?? 0,
@@ -100,22 +98,11 @@ export default async function DashboardPage({
             <CardTitle className='text-base'>Connected Repositories</CardTitle>
           </CardHeader>
           <CardContent className='flex flex-col gap-3'>
-            {repos && repos.length > 0 ? repos.map((repo: Repo) => (
-              <div key={repo.id}
-                className='flex items-center justify-between py-3 border-b border-white/5 last:border-0'>
-                <span className='text-sm font-medium'>{repo.repo_full_name}</span>
-                <Badge variant='outline' className='border-green-500/40 text-green-400'>
-                  Active
-                </Badge>
-              </div>
-            )) : (
-              <p className='text-white/40 text-sm text-center py-4'>
-                No repositories connected yet.{' '}
-                <a href={installUrl} className='text-white underline'>
-                  Connect one now
-                </a>
-              </p>
-            )}
+            <RepoList
+              userId={user.id}
+              installUrl={installUrl}
+              apiUrl={process.env.NEXT_PUBLIC_API_URL!}
+              />
           </CardContent>
         </Card>
 
