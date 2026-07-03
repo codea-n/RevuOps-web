@@ -1,5 +1,8 @@
 'use server'
 
+import { createClient } from '@/lib/supabase/server'
+import { redirect } from 'next/navigation'
+
 export async function registerInstallation(
   installationId: string,
   userId: string,
@@ -28,4 +31,10 @@ export async function getUserRepos(userId: string) {
   )
   if (!res.ok) return { repos: [] }
   return res.json()
+}
+
+export async function signOut() {
+  const supabase = await createClient()
+  await supabase.auth.signOut()
+  redirect('/login')
 }
