@@ -64,6 +64,14 @@ export default async function DashboardPage({
             <p className="text-white/50 text-sm mt-1">{user.email}</p>
           </div>
           <div className="flex items-center gap-3">
+            <Link href="/dashboard/analytics">
+              <Button
+                variant="outline"
+                className="border-white/20 text-white hover:bg-white/10"
+              >
+                Analytics
+              </Button>
+            </Link>
             <a href={installUrl}>
               <Button className="bg-white text-black hover:bg-white/90 font-semibold">
                 + Connect Repository
