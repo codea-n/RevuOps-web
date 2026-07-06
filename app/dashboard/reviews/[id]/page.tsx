@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import type { SecurityIssue, PerformanceHotspot, ArchitectureNote } from '@/app/dashboard/types'
+import ThemeToggle from '@/app/components/ThemeToggle'
 
 export default async function ReviewDetailPage({
   params,
@@ -16,7 +17,6 @@ export default async function ReviewDetailPage({
   if (!user) redirect('/login')
 
   const { id } = await params
-
   const { data: review, error } = await supabase
     .from('reviews')
     .select('*')
@@ -25,16 +25,20 @@ export default async function ReviewDetailPage({
 
   if (error || !review) {
     return (
-      <main className='min-h-screen bg-black text-white p-8'>
-        <div className='max-w-3xl mx-auto'>
-          <Link href='/dashboard'>
-            <Button variant='outline' className='border-white/20 text-white hover:bg-white/10 mb-6'>
-              ← Back to Dashboard
-            </Button>
+      <div className='min-h-screen bg-background'>
+        <header className='border-b border-border'>
+          <div className='max-w-4xl mx-auto px-6 h-14 flex items-center justify-between'>
+            <Link href='/dashboard' className='font-semibold tracking-tight text-foreground'>RevuOps</Link>
+            <ThemeToggle />
+          </div>
+        </header>
+        <main className='max-w-4xl mx-auto px-6 py-12'>
+          <p className='text-muted-foreground'>Review not found.</p>
+          <Link href='/dashboard' className='mt-4 inline-block'>
+            <Button variant='outline' size='sm'>← Back to dashboard</Button>
           </Link>
-          <p className='text-white/50'>Review not found.</p>
-        </div>
-      </main>
+        </main>
+      </div>
     )
   }
 
@@ -44,42 +48,53 @@ export default async function ReviewDetailPage({
   const architecture = review.architecture_findings || {}
 
   return (
-    <main className='min-h-screen bg-black text-white p-8'>
-      <div className='max-w-3xl mx-auto flex flex-col gap-6'>
+    <div className='min-h-screen bg-background'>
 
-        {/* Back button */}
-        <Link href='/dashboard'>
-          <Button variant='outline' className='border-white/20 text-white hover:bg-white/10 w-fit'>
-            ← Back to Dashboard
-          </Button>
-        </Link>
+      {/* Nav */}
+      <header className='border-b border-border bg-background/95 backdrop-blur sticky top-0 z-10'>
+        <div className='max-w-4xl mx-auto px-6 h-14 flex items-center justify-between'>
+          <div className='flex items-center gap-6'>
+            <Link href='/' className='font-semibold tracking-tight text-foreground'>RevuOps</Link>
+            <Link href='/dashboard' className='text-sm text-muted-foreground hover:text-foreground transition-colors'>
+              ← Dashboard
+            </Link>
+          </div>
+          <ThemeToggle />
+        </div>
+      </header>
+
+      <main className='max-w-4xl mx-auto px-6 py-8 flex flex-col gap-6'>
 
         {/* Header */}
         <div className='flex items-start justify-between'>
           <div className='flex flex-col gap-1'>
-            <h1 className='text-2xl font-bold'>
-              {review.repo} — PR #{review.pr_number}
+            <h1 className='text-xl font-semibold text-foreground'>
+              {review.repo}
             </h1>
-            <span className='text-white/40 text-sm'>
-              {new Date(review.created_at).toLocaleString()}
-            </span>
+            <p className='text-sm text-muted-foreground'>
+              PR #{review.pr_number} · {new Date(review.created_at).toLocaleDateString('en-US', {
+                month: 'long', day: 'numeric', year: 'numeric',
+              })}
+            </p>
           </div>
           <Badge
             variant='outline'
             className={isApproved
-              ? 'border-green-500/40 text-green-400'
-              : 'border-red-500/40 text-red-400'}>
+              ? 'border-green-200 bg-green-50 text-green-700 dark:border-green-800 dark:bg-green-950 dark:text-green-400'
+              : 'border-red-200 bg-red-50 text-red-700 dark:border-red-800 dark:bg-red-950 dark:text-red-400'}>
             {isApproved ? 'Approved' : 'Flagged'}
           </Badge>
         </div>
 
-        {/* Full review text */}
-        <Card className='bg-zinc-900 border-white/10 text-white'>
-          <CardHeader>
-            <CardTitle className='text-base'>Review Summary</CardTitle>
+        {/* Review text */}
+        <Card className='border-border shadow-none'>
+          <CardHeader className='pb-3'>
+            <CardTitle className='text-xs font-medium uppercase tracking-wide text-muted-foreground'>
+              Review summary
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className='text-white/80 text-sm leading-relaxed whitespace-pre-wrap'>
+            <p className='text-sm leading-relaxed text-foreground whitespace-pre-wrap'>
               {review.review_text}
             </p>
           </CardContent>
@@ -87,22 +102,24 @@ export default async function ReviewDetailPage({
 
         {/* Security findings */}
         {security.issues?.length > 0 && (
-          <Card className='bg-zinc-900 border-red-500/20 text-white'>
-            <CardHeader>
-              <CardTitle className='text-base flex items-center gap-2'>
-                <span className='text-red-400'>⚠</span> Security Findings
+          <Card className='border-red-200 dark:border-red-900 shadow-none'>
+            <CardHeader className='pb-3'>
+              <CardTitle className='text-xs font-medium uppercase tracking-wide text-red-600 dark:text-red-400'>
+                Security findings
               </CardTitle>
             </CardHeader>
-            <CardContent className='flex flex-col gap-3'>
+            <CardContent className='p-0'>
               {security.issues.map((issue: SecurityIssue, i: number) => (
-                <div key={i} className='flex flex-col gap-1 py-2 border-b border-white/5 last:border-0'>
-                  <div className='flex items-center gap-2'>
-                    <Badge variant='outline' className='border-red-500/40 text-red-400 text-xs'>
-                      {issue.code || issue.rule_code}
-                    </Badge>
-                    <span className='text-xs text-white/40'>Line {issue.line}</span>
+                <div key={i}
+                  className='flex items-start justify-between px-6 py-3 border-b border-border last:border-0'>
+                  <div className='flex flex-col gap-1'>
+                    <p className='text-sm text-foreground'>{issue.message}</p>
+                    <p className='text-xs text-muted-foreground'>Line {issue.line}</p>
                   </div>
-                  <p className='text-sm text-white/70'>{issue.message}</p>
+                  <Badge variant='outline'
+                    className='border-red-200 bg-red-50 text-red-700 dark:border-red-800 dark:bg-red-950 dark:text-red-400 ml-4 shrink-0'>
+                    {issue.code || issue.rule_code}
+                  </Badge>
                 </div>
               ))}
             </CardContent>
@@ -111,21 +128,21 @@ export default async function ReviewDetailPage({
 
         {/* Performance findings */}
         {performance.hotspots?.length > 0 && (
-          <Card className='bg-zinc-900 border-yellow-500/20 text-white'>
-            <CardHeader>
-              <CardTitle className='text-base flex items-center gap-2'>
-                <span className='text-yellow-400'>⚡</span> Performance Hotspots
+          <Card className='border-yellow-200 dark:border-yellow-900 shadow-none'>
+            <CardHeader className='pb-3'>
+              <CardTitle className='text-xs font-medium uppercase tracking-wide text-yellow-600 dark:text-yellow-400'>
+                Performance hotspots
               </CardTitle>
             </CardHeader>
-            <CardContent className='flex flex-col gap-3'>
+            <CardContent className='p-0'>
               {performance.hotspots.map((hotspot: PerformanceHotspot, i: number) => (
-                <div key={i} className='flex flex-col gap-1 py-2 border-b border-white/5 last:border-0'>
-                  <div className='flex items-center gap-2'>
-                    <span className='text-sm font-medium'>{hotspot.function}</span>
-                    <span className='text-xs text-white/40'>Line {hotspot.line}</span>
+                <div key={i} className='px-6 py-3 border-b border-border last:border-0'>
+                  <div className='flex items-center gap-2 mb-1'>
+                    <span className='text-sm font-medium text-foreground'>{hotspot.function}</span>
+                    <span className='text-xs text-muted-foreground'>Line {hotspot.line}</span>
                   </div>
                   {hotspot.issues.map((issue: string, j: number) => (
-                    <p key={j} className='text-sm text-white/70'>• {issue}</p>
+                    <p key={j} className='text-sm text-muted-foreground'>· {issue}</p>
                   ))}
                 </div>
               ))}
@@ -133,30 +150,31 @@ export default async function ReviewDetailPage({
           </Card>
         )}
 
-        {/* Architecture findings */}
+        {/* Architecture notes */}
         {architecture.notes?.length > 0 && (
-          <Card className='bg-zinc-900 border-blue-500/20 text-white'>
-            <CardHeader>
-              <CardTitle className='text-base flex items-center gap-2'>
-                <span className='text-blue-400'>🏗</span> Architecture Notes
+          <Card className='border-blue-200 dark:border-blue-900 shadow-none'>
+            <CardHeader className='pb-3'>
+              <CardTitle className='text-xs font-medium uppercase tracking-wide text-blue-600 dark:text-blue-400'>
+                Architecture notes
               </CardTitle>
             </CardHeader>
-            <CardContent className='flex flex-col gap-3'>
+            <CardContent className='p-0'>
               {architecture.notes.map((note: ArchitectureNote, i: number) => (
-                <div key={i} className='py-2 border-b border-white/5 last:border-0'>
-                  <p className='text-sm text-white/70'>{note.type}: {note.context}</p>
+                <div key={i} className='px-6 py-3 border-b border-border last:border-0'>
+                  <p className='text-sm text-foreground'>{note.type}</p>
+                  <p className='text-xs text-muted-foreground mt-0.5'>{note.context}</p>
                 </div>
               ))}
             </CardContent>
           </Card>
         )}
 
-        {/* Model info */}
-        <p className='text-white/20 text-xs text-center'>
-          Reviewed by {review.model_version} • RevuOps
+        {/* Footer */}
+        <p className='text-xs text-muted-foreground text-center'>
+          Reviewed by {review.model_version} · RevuOps
         </p>
 
-      </div>
-    </main>
+      </main>
+    </div>
   )
 }
