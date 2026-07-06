@@ -49,7 +49,7 @@ export default function LoginPage() {
               Continue with GitHub
             </Button>
             <p className='text-xs text-center text-muted-foreground'>
-              By continuing, you agree to our terms of service.
+              See you back soon!
             </p>
           </CardContent>
         </Card>
