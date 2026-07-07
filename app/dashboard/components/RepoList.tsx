@@ -69,8 +69,8 @@ export default function RepoList({
         <p className="text-yellow-400/70 text-sm">
           Waking up backend… ({secondsWaited}s)
         </p>
-        <p className="text-white/30 text-xs">
-          Free tier cold start — usually under 30s
+        <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
+          Usually connects in under 50s
         </p>
       </div>
     );
