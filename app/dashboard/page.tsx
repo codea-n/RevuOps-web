@@ -28,11 +28,7 @@ export default async function DashboardPage({
   const params = await searchParams;
   if (params.installation_id) {
     try {
-      await registerInstallation(
-        params.installation_id,
-        user.id,
-        githubUsername,
-      );
+      await registerInstallation(params.installation_id, githubUsername);
     } catch (e) {
       console.error("Failed to register installation:", e);
     }
